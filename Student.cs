@@ -6,4 +6,5 @@ internal sealed class Student
     public string Name { get; set; } = null!;
     public string Institute { get; set; } = null!;
     public string? PhotoFileId { get; set; }
+    public string? Description { get; set; }
 }

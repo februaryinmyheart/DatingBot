@@ -81,6 +81,11 @@ internal sealed class UpdateHandlers
             case ConversationState.WaitingForInstitute:
                 // ожидание выбора института, текст здесь игнорируем
                 break;
+            case ConversationState.WaitingForDescription:
+                BotState.SaveDraft(chatId, description: msg.Text);
+                BotState.UserStates[chatId] = ConversationState.WaitingForPhoto;
+                await _bot.SendMessage(msg.Chat, "Отправь, пожалуйста, своё фото одним сообщением.");
+                break;
             default:
                 await HandleCommandAsync("/start", "", msg);
                 break;
@@ -118,6 +123,10 @@ internal sealed class UpdateHandlers
         }
 
         var text = $"Твоя анкета:\nИмя: {student.Name}\nИнститут: {student.Institute}";
+        if (!string.IsNullOrWhiteSpace(student.Description))
+        {
+            text += $"\nОписание: {student.Description}";
+        }
 
         if (!string.IsNullOrWhiteSpace(student.PhotoFileId))
         {
@@ -180,14 +189,14 @@ internal sealed class UpdateHandlers
             var chatId = callbackQuery.Message!.Chat.Id;
 
             BotState.SaveDraft(chatId, institute: institute);
-            BotState.UserStates[chatId] = ConversationState.WaitingForPhoto;
+            BotState.UserStates[chatId] = ConversationState.WaitingForDescription;
 
             await _bot.AnswerCallbackQuery(callbackQuery.Id, $"Институт: {institute}");
 
             // обновляем сообщение с кнопками, чтобы убрать клавиатуру
             await _bot.EditMessageReplyMarkup(callbackQuery.Message.Chat, callbackQuery.Message.MessageId, replyMarkup: null);
 
-            await _bot.SendMessage(callbackQuery.Message.Chat, "Отправь, пожалуйста, своё фото одним сообщением.");
+            await _bot.SendMessage(callbackQuery.Message.Chat, "Напиши, пожалуйста, текст своей анкеты.");
             return;
         }
 

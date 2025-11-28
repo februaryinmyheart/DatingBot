@@ -7,6 +7,7 @@ internal enum ConversationState
     None,
     WaitingForName,
     WaitingForInstitute,
+    WaitingForDescription,
     WaitingForPhoto
 }
 
@@ -27,7 +28,7 @@ internal static class BotState
         UserDrafts[chatId] = new Student { ChatId = chatId };
     }
 
-    internal static void SaveDraft(long chatId, string? name = null, string? institute = null, string? photoFileId = null)
+    internal static void SaveDraft(long chatId, string? name = null, string? institute = null, string? description = null, string? photoFileId = null)
     {
         if (!UserDrafts.TryGetValue(chatId, out var draft))
         {
@@ -37,6 +38,7 @@ internal static class BotState
 
         if (name != null) draft.Name = name;
         if (institute != null) draft.Institute = institute;
+        if (description != null) draft.Description = description;
         if (photoFileId != null) draft.PhotoFileId = photoFileId;
     }
 }

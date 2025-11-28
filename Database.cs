@@ -28,7 +28,8 @@ internal sealed class Database
             chat_id INTEGER NOT NULL,
             name TEXT NOT NULL,
             institute TEXT NOT NULL,
-            photo_file_id TEXT
+            photo_file_id TEXT,
+            description TEXT
         );";
 
         using var command = new SqliteCommand(cmdText, connection);
@@ -40,12 +41,13 @@ internal sealed class Database
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
-        using var cmd = new SqliteCommand(@"INSERT INTO students(chat_id, name, institute, photo_file_id)
-                                            VALUES ($chat_id, $name, $institute, $photo_file_id);", connection);
+        using var cmd = new SqliteCommand(@"INSERT INTO students(chat_id, name, institute, photo_file_id, description)
+                                            VALUES ($chat_id, $name, $institute, $photo_file_id, $description);", connection);
         cmd.Parameters.AddWithValue("$chat_id", student.ChatId);
         cmd.Parameters.AddWithValue("$name", student.Name);
         cmd.Parameters.AddWithValue("$institute", student.Institute);
         cmd.Parameters.AddWithValue("$photo_file_id", (object?)student.PhotoFileId ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$description", (object?)student.Description ?? DBNull.Value);
         cmd.ExecuteNonQuery();
     }
 
@@ -54,7 +56,7 @@ internal sealed class Database
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
-        using var cmd = new SqliteCommand(@"SELECT name, institute, photo_file_id
+        using var cmd = new SqliteCommand(@"SELECT name, institute, photo_file_id, description
                                            FROM students
                                            WHERE chat_id = $chat_id
                                            ORDER BY id DESC
@@ -70,7 +72,8 @@ internal sealed class Database
             ChatId = chatId,
             Name = reader.GetString(0),
             Institute = reader.GetString(1),
-            PhotoFileId = reader.IsDBNull(2) ? null : reader.GetString(2)
+            PhotoFileId = reader.IsDBNull(2) ? null : reader.GetString(2),
+            Description = reader.IsDBNull(3) ? null : reader.GetString(3)
         };
 
         return student;
