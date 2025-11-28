@@ -34,6 +34,24 @@ internal sealed class Database
 
         using var command = new SqliteCommand(cmdText, connection);
         command.ExecuteNonQuery();
+
+        var existingColumns = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        using var pragmaCmd = new SqliteCommand("PRAGMA table_info(students);", connection);
+        using var reader = pragmaCmd.ExecuteReader();
+        while (reader.Read())
+        {
+            var columnName = reader.GetString(1);
+            existingColumns.Add(columnName);
+        }
+
+        // каждый раз при добавлении нового поля у class Student нужно добавлять сюда проверку и создание столбца
+        if (!existingColumns.Contains("description"))
+        {
+            using var alterCmd = new SqliteCommand(
+                "ALTER TABLE students ADD COLUMN description TEXT;",
+                connection);
+            alterCmd.ExecuteNonQuery();
+        }
     }
 
     public void SaveStudent(Student student)
