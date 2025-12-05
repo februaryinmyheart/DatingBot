@@ -59,6 +59,10 @@ internal sealed class Database
         using var connection = new SqliteConnection(_connectionString);
         connection.Open();
 
+        using var deleteCmd = new SqliteCommand("DELETE FROM students WHERE chat_id = $chat_id;", connection);
+        deleteCmd.Parameters.AddWithValue("$chat_id", student.ChatId);
+        deleteCmd.ExecuteNonQuery();
+
         using var cmd = new SqliteCommand(@"INSERT INTO students(chat_id, name, institute, photo_file_id, description)
                                             VALUES ($chat_id, $name, $institute, $photo_file_id, $description);", connection);
         cmd.Parameters.AddWithValue("$chat_id", student.ChatId);
